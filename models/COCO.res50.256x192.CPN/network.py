@@ -13,6 +13,7 @@ from nets.basemodel import resnet50, resnet_arg_scope, resnet_v1
 resnet_arg_scope = partial(resnet_arg_scope, bn_trainable=cfg.bn_train)
 
 def create_global_net(blocks, is_training, trainable=True):
+    #blocks = resnet_fms = [(32,64,48,256),(32,32,24,512),(32,16,12,1024),(32,8,6,2048)]
     global_fms = []
     global_outs = []
     last_fm = None
@@ -22,8 +23,14 @@ def create_global_net(blocks, is_training, trainable=True):
             lateral = slim.conv2d(block, 256, [1, 1],
                 trainable=trainable, weights_initializer=initializer,
                 padding='SAME', activation_fn=tf.nn.relu,
-                scope='lateral/res{}'.format(5-i))
-
+                scope='lateral/res{}'.format(5-i))                      
+        '''
+        print("lateral.shape=",lateral.shape) 
+        lateral.shape= (32, 8, 6, 256)
+        lateral.shape= (32, 16, 12, 256)
+        lateral.shape= (32, 32, 24, 256)
+        lateral.shape= (32, 64, 48, 256)
+        '''
         if last_fm is not None:
             sz = tf.shape(lateral)
             upsample = tf.image.resize_bilinear(last_fm, (sz[1], sz[2]),
@@ -45,13 +52,21 @@ def create_global_net(blocks, is_training, trainable=True):
                 trainable=trainable, weights_initializer=initializer,
                 padding='SAME', activation_fn=None,
                 scope='pyramid/res{}'.format(5-i))
+            '''
+            print("out.shape  = ",out.shape)
+            out.shape  =  (32, 8, 6, 17)
+            out.shape  =  (32, 16, 12, 17)
+            out.shape  =  (32, 32, 24, 17)
+            out.shape  =  (32, 64, 48, 17)
+            '''
         global_fms.append(last_fm)
         global_outs.append(tf.image.resize_bilinear(out, (cfg.output_shape[0], cfg.output_shape[1])))
-    global_fms.reverse()
-    global_outs.reverse()
+    global_fms.reverse()                                                     #[(32,64,48,256),(32,32,24,256),(32,16,12,256),(32,8,6,256)]
+    global_outs.reverse()                                                    #[(32,64,48,17),(32,64,48,17),(32,64,48,17),(32,64,48,17)]
     return global_fms, global_outs
 
 def create_refine_net(blocks, is_training, trainable=True):
+    #blocks = [(32,64,48,256),(32,32,24,256),(32,16,12,256),(32,8,6,256)]
     initializer = tf.contrib.layers.xavier_initializer()
     bottleneck = resnet_v1.bottleneck
     refine_fms = []
@@ -63,13 +78,14 @@ def create_refine_net(blocks, is_training, trainable=True):
         mid_fm = tf.image.resize_bilinear(mid_fm, (cfg.output_shape[0], cfg.output_shape[1]),
             name='upsample_conv/res{}'.format(2+i))
         refine_fms.append(mid_fm)
-    refine_fm = tf.concat(refine_fms, axis=3)
+    #print("refine_fms = ",refine_fms)   [(32,64,48,256),(32,64,48,256),(32,64,48,256),(32,64,48,256)]
+    refine_fm = tf.concat(refine_fms, axis=3)    #print("refine_fm.shape = ",refine_fm.shape)     refine_fm.shape =  (32, 64, 48, 1024)
     with slim.arg_scope(resnet_arg_scope(bn_is_training=is_training)):
-        refine_fm = bottleneck(refine_fm, 256, 128, stride=1, scope='final_bottleneck')
+        refine_fm = bottleneck(refine_fm, 256, 128, stride=1, scope='final_bottleneck')   #print("refine_fm.shape = ",refine_fm.shape)   refine_fm.shape =  (32, 64, 48, 256)
         res = slim.conv2d(refine_fm, cfg.nr_skeleton, [3, 3],
             trainable=trainable, weights_initializer=initializer,
             padding='SAME', activation_fn=None,
-            scope='refine_out')
+            scope='refine_out')                                                           #print("res.shape = ",res.shape)   res.shape =  (32, 64, 48, 17)
     return res
 
 class Network(ModelDesc):
@@ -107,9 +123,9 @@ class Network(ModelDesc):
             image = tf.placeholder(tf.float32, shape=[None, *cfg.data_shape, 3])
             self.set_inputs(image)
 
-        resnet_fms = resnet50(image, is_train, bn_trainable=True) #image = [batch_size,256,192,3]
-        global_fms, global_outs = create_global_net(resnet_fms, is_train)
-        refine_out = create_refine_net(global_fms, is_train)
+        resnet_fms = resnet50(image, is_train, bn_trainable=True) #image = [32,256,192,3]   resnet_fms = [(32,64,48,256),(32,32,24,512),(32,16,12,1024),(32,8,6,2048)]
+        global_fms, global_outs = create_global_net(resnet_fms, is_train) #global_fms = [(32,64,48,256),(32,32,24,256),(32,16,12,256),(32,8,6,256)],global_outs = [(32,64,48,17),(32,64,48,17),(32,64,48,17),(32,64,48,17)]
+        refine_out = create_refine_net(global_fms, is_train)    #refine_out = (32,64,48,17)
 
         # make loss
         if is_train:
