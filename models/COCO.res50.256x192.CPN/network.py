@@ -65,6 +65,51 @@ def create_global_net(blocks, is_training, trainable=True):
     global_outs.reverse()                                                    #[(32,64,48,17),(32,64,48,17),(32,64,48,17),(32,64,48,17)]
     return global_fms, global_outs
 
+#cdx 2018.1018
+def create_coarse_net(blocks,is_trainging,trainable=True):
+    #blocks = [(32,64,48,256),(32,32,24,256),(32,16,12,256),(32,8,6,256)]
+    initializer = tf.contrib.layers.xavier_initializer()
+    bottleneck = resnet_v1.bottleneck
+    coarse_fms = []
+    coarse_outs = []
+    last_fm = None
+    for i,block in enumerate(blocks):
+        mid_fm = block
+        with slim.arg_scope(resnet_arg_scope(bn_is_training=is_trainging)):
+            for j in range(i):
+                mid_fm = bottleneck(mid_fm,256,128,stride=1,scope='res{}/coarse_conv{}'.format(2+i,j))
+                coarse_fms.append(mid_fm)
+    for i,block in enumerate(reversed(coarse_fms)):
+        with slim.arg_scope(resnet_arg_scope(bn_is_training=is_trainging)):
+            lateral = slim.conv2d(block, 256, [1, 1],
+                trainable=trainable, weights_initializer=initializer,
+                padding='SAME', activation_fn=tf.nn.relu,
+                scope='coarse/res{}'.format(5-i))
+        if last_fm is not None:
+            sz = tf.shape(lateral)
+            upsample = tf.image.resize_bilinear(last_fm, (sz[1], sz[2]),
+                name='upsample2/res{}'.format(5-i))
+            upsample = slim.conv2d(upsample, 256, [1, 1],
+                trainable=trainable, weights_initializer=initializer,
+                padding='SAME', activation_fn=None,
+                scope='merge2/res{}'.format(5-i))
+            last_fm = upsample + lateral
+        else:
+            last_fm = lateral
+        with slim.arg_scope(resnet_arg_scope(bn_is_training=is_trainging)):
+            tmp = slim.conv2d(last_fm, 256, [1, 1],
+                trainable=trainable, weights_initializer=initializer,
+                padding='SAME', activation_fn=tf.nn.relu,
+                scope='tmp2/res{}'.format(5-i))
+            out = slim.conv2d(tmp, cfg.nr_skeleton, [3, 3],
+                trainable=trainable, weights_initializer=initializer,
+                padding='SAME', activation_fn=None,
+                scope='pyramid2/res{}'.format(5-i))
+        coarse_outs.append(tf.image.resize_bilinear(out, (cfg.output_shape[0], cfg.output_shape[1])))
+    coarse_fms.reverse()
+    coarse_outs.reverse()
+    return coarse_fms,coarse_outs
+
 def create_refine_net(blocks, is_training, trainable=True):
     #blocks = [(32,64,48,256),(32,32,24,256),(32,16,12,256),(32,8,6,256)]
     initializer = tf.contrib.layers.xavier_initializer()
@@ -125,7 +170,11 @@ class Network(ModelDesc):
 
         resnet_fms = resnet50(image, is_train, bn_trainable=True) #image = [32,256,192,3]   resnet_fms = [(32,64,48,256),(32,32,24,512),(32,16,12,1024),(32,8,6,2048)]
         global_fms, global_outs = create_global_net(resnet_fms, is_train) #global_fms = [(32,64,48,256),(32,32,24,256),(32,16,12,256),(32,8,6,256)],global_outs = [(32,64,48,17),(32,64,48,17),(32,64,48,17),(32,64,48,17)]
-        refine_out = create_refine_net(global_fms, is_train)    #refine_out = (32,64,48,17)
+
+        #
+        coarse_fms,coarse_outs = create_coarse_net(global_fms,is_train)
+        #
+        refine_out = create_refine_net(coarse_fms, is_train)    #refine_out = (32,64,48,17)
 
         # make loss
         if is_train:
@@ -145,11 +194,20 @@ class Network(ModelDesc):
                 global_loss += tf.reduce_mean(tf.square(global_out - global_label)) / len(labels)
             global_loss /= 2.
             self.add_tower_summary('global_loss', global_loss)
+
+            #cdx 2018.10.18
+            coarse_loss = 0.
+            for i,(coarse_out,label) in enumerate(zip(coarse_outs,labels)):
+                coarse_label = label*tf.to_float(tf.greater(tf.reshape(valids,(-1,1,1,cfg.nr_skeleton)),1.1))
+                coarse_loss += tf.reduce_mean(tf.square(coarse_out - coarse_label)) / len(labels)
+            self.add_tower_summary('coarse_loss',coarse_loss)
+            #coarse_loss = ohkm(coarse_loss,12)
+            #
             refine_loss = tf.reduce_mean(tf.square(refine_out - label7), (1,2)) * tf.to_float((tf.greater(valids, 0.1)))
             refine_loss = ohkm(refine_loss, 8)
             self.add_tower_summary('refine_loss', refine_loss)
 
-            total_loss = refine_loss + global_loss
+            total_loss = refine_loss + global_loss + coarse_loss
             self.add_tower_summary('loss', total_loss)
             self.set_loss(total_loss)
         else:

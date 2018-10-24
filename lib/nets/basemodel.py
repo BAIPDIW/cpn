@@ -56,31 +56,30 @@ def resnet50(image, bn_is_training, bn_trainable):
     '''
     with slim.arg_scope(resnet_arg_scope(bn_is_training=bn_is_training, bn_trainable=bn_trainable)):
         with tf.variable_scope('resnet_v1_50', 'resnet_v1_50'):
-            net = resnet_utils.conv2d_same(
-                image, 64, 7, stride=2, scope='conv1')
-            net = tf.pad(net, [[0, 0], [1, 1], [1, 1], [0, 0]])
+            net = resnet_utils.conv2d_same(                           #image = (32,256,192,3) 
+                image, 64, 7, stride=2, scope='conv1')                #print(net.shape)    (32, 128, 96, 64)
+            net = tf.pad(net, [[0, 0], [1, 1], [1, 1], [0, 0]])       #print(net.shape) (32,130,98,64)
             net = slim.max_pool2d(
-                net, [3, 3], stride=2, padding='VALID', scope='pool1')
+                net, [3, 3], stride=2, padding='VALID', scope='pool1') #print(net.shape) (32,64,48,64)
         net, _ = resnet_v1.resnet_v1(                                  # trainable ?????
             net, blocks[0:1],
             global_pool=False, include_root_block=False,
-            scope='resnet_v1_50')
-
+            scope='resnet_v1_50')                                      #print(net.shape)   (32, 64, 48, 256)
     with slim.arg_scope(resnet_arg_scope(bn_is_training=bn_is_training, bn_trainable=bn_trainable)):
         net2, _ = resnet_v1.resnet_v1(
             net, blocks[1:2],
             global_pool=False, include_root_block=False,
-            scope='resnet_v1_50')
+            scope='resnet_v1_50')                                     #print("net2.shape = ",net2.shape)   net2.shape =  (32, 32, 24, 512)
     with slim.arg_scope(resnet_arg_scope(bn_is_training=bn_is_training, bn_trainable=bn_trainable)):
         net3, _ = resnet_v1.resnet_v1(
             net2, blocks[2:3],
             global_pool=False, include_root_block=False,
-            scope='resnet_v1_50')
+            scope='resnet_v1_50')                                     #print("net3.shape=",net3.shape)   net3.shape= (32, 16, 12, 1024)
     with slim.arg_scope(resnet_arg_scope(bn_is_training=bn_is_training, bn_trainable=bn_trainable)):
         net4, _ = resnet_v1.resnet_v1(
             net3, blocks[3:4],
             global_pool=False, include_root_block=False,
-            scope='resnet_v1_50')
+            scope='resnet_v1_50')                                     #print("net4.shape = ",net4.shape)  net3.shape =  (32, 8, 6, 2048)
 
     resnet_features = [net, net2, net3, net4]
     return resnet_features

@@ -1,0 +1,63 @@
+[92m10-03 20:33:12[0m Epoch 350 itr 21059968/60000: lr: 1.5625e-05 speed: 0.55(0.44s r0.11)s/itr 0.29h/epoch global_loss: 28.3750 refine_loss: 51.1873 loss: 79.5623
+
+2018.09.29 预训练的模型 res50.256*192 的结果
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets= 20 ] = 0.697
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets= 20 ] = 0.883
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets= 20 ] = 0.770
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets= 20 ] = 0.662
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets= 20 ] = 0.761
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 20 ] = 0.764
+ Average Recall     (AR) @[ IoU=0.50      | area=   all | maxDets= 20 ] = 0.927
+ Average Recall     (AR) @[ IoU=0.75      | area=   all | maxDets= 20 ] = 0.823
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets= 20 ] = 0.715
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets= 20 ] = 0.830
+
+2018.10.07 自训练模型 res50.256*192的结果 350 epoch
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets= 20 ] = 0.698     高0.001
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets= 20 ] = 0.883     
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets= 20 ] = 0.773     高0.003
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets= 20 ] = 0.662
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets= 20 ] = 0.765     高0.004
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 20 ] = 0.767     高0.003
+ Average Recall     (AR) @[ IoU=0.50      | area=   all | maxDets= 20 ] = 0.927
+ Average Recall     (AR) @[ IoU=0.75      | area=   all | maxDets= 20 ] = 0.831     高0.008
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets= 20 ] = 0.718     高0.003
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets= 20 ] = 0.833     高0.003
+
+2018.10.07 自训练模型 res50.256*192的结果 400 epoch
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets= 20 ] = 0.700
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets= 20 ] = 0.884
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets= 20 ] = 0.774
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets= 20 ] = 0.663
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets= 20 ] = 0.766
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 20 ] = 0.767
+ Average Recall     (AR) @[ IoU=0.50      | area=   all | maxDets= 20 ] = 0.926
+ Average Recall     (AR) @[ IoU=0.75      | area=   all | maxDets= 20 ] = 0.832
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets= 20 ] = 0.719
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets= 20 ] = 0.833
+
+ 2018.10.19 自训练 res50.256*192  70 epoch    引入coarse net
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets= 20 ] = 0.677
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets= 20 ] = 0.873
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets= 20 ] = 0.751
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets= 20 ] = 0.644
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets= 20 ] = 0.738
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 20 ] = 0.744
+ Average Recall     (AR) @[ IoU=0.50      | area=   all | maxDets= 20 ] = 0.917
+ Average Recall     (AR) @[ IoU=0.75      | area=   all | maxDets= 20 ] = 0.807
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets= 20 ] = 0.698
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets= 20 ] = 0.807
+
+
+2018.10.19 自训练 res50.256*192  190 epoch    引入coarse net
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets= 20 ] = 0.706     高0.009
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets= 20 ] = 0.885     高0.002
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets= 20 ] = 0.779     高0.009
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets= 20 ] = 0.672     高0.01
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets= 20 ] = 0.769     高0.008
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 20 ] = 0.772     高0.008
+ Average Recall     (AR) @[ IoU=0.50      | area=   all | maxDets= 20 ] = 0.926     低0.001
+ Average Recall     (AR) @[ IoU=0.75      | area=   all | maxDets= 20 ] = 0.833     高0.002
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets= 20 ] = 0.725     高0.007
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets= 20 ] = 0.836     高0.006
+

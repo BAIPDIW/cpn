@@ -133,6 +133,13 @@ def conv2d_same(inputs, num_outputs, kernel_size, stride, rate=1, scope=None):
     pad_end = pad_total - pad_beg
     inputs = array_ops.pad(
         inputs, [[0, 0], [pad_beg, pad_end], [pad_beg, pad_end], [0, 0]])
+    #print("input = ",inputs.shape)
+    '''
+    input =  (32, 262, 198, 3)
+    input =  (32, 66, 50, 128)
+    input =  (32, 34, 26, 256)
+    input =  (32, 18, 14, 512)
+    '''
     return layers_lib.conv2d(
         inputs,
         num_outputs,
@@ -202,7 +209,27 @@ def stack_blocks_dense(net,
 
         with variable_scope.variable_scope('unit_%d' % (i + 1), values=[net]):
           unit_depth, unit_depth_bottleneck, unit_stride = unit
+          '''
+          print("unit=",unit)
+          
+          unit= (256, 64, 1)
+          unit= (256, 64, 1)
+          unit= (256, 64, 1)
+          unit= (512, 128, 2)
+          unit= (512, 128, 1)
+          unit= (512, 128, 1)
+          unit= (512, 128, 1)
+          unit= (1024, 256, 2)
+          unit= (1024, 256, 1)
+          unit= (1024, 256, 1)
+          unit= (1024, 256, 1)
+          unit= (1024, 256, 1)
+          unit= (1024, 256, 1)
+          unit= (2048, 512, 2)
+          unit= (2048, 512, 1)
+          unit= (2048, 512, 1)
 
+          '''
           # If we have reached the target output_stride, then we need to employ
           # atrous convolution with stride=1 and multiply the atrous rate by the
           # current unit's stride for use in subsequent layers.

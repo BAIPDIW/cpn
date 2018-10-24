@@ -1,0 +1,4 @@
+pretrainedmodels/
+data/COCO/MSCOCO/annotations/
+data/imagenet_weights/
+/logs
