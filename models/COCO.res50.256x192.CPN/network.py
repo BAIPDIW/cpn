@@ -167,15 +167,22 @@ class Network(ModelDesc):
         else:
             image = tf.placeholder(tf.float32, shape=[None, *cfg.data_shape, 3])
             self.set_inputs(image)
+        
+        with tf.name_scope('image'):
+            image_shaped_input = tf.reshape(image, [-1, 256, 192, 3])
+            tf.summary.image('input',image_shaped_input,4)
 
         resnet_fms = resnet50(image, is_train, bn_trainable=True) #image = [32,256,192,3]   resnet_fms = [(32,64,48,256),(32,32,24,512),(32,16,12,1024),(32,8,6,2048)]
         global_fms, global_outs = create_global_net(resnet_fms, is_train) #global_fms = [(32,64,48,256),(32,32,24,256),(32,16,12,256),(32,8,6,256)],global_outs = [(32,64,48,17),(32,64,48,17),(32,64,48,17),(32,64,48,17)]
+
 
         #
         coarse_fms,coarse_outs = create_coarse_net(global_fms,is_train)
         #
         refine_out = create_refine_net(coarse_fms, is_train)    #refine_out = (32,64,48,17)
-
+        with tf.name_scope('refine_out'):
+            refine_out_reshape = tf.reshape(refine_out,[-1,64,48,1])
+            tf.summary.image('heatmap',refine_out_reshape,17)
         # make loss
         if is_train:
             def ohkm(loss, top_k):
@@ -194,19 +201,20 @@ class Network(ModelDesc):
                 global_loss += tf.reduce_mean(tf.square(global_out - global_label)) / len(labels)
             global_loss /= 2.
             self.add_tower_summary('global_loss', global_loss)
-
+            tf.summary.scalar('global_loss',global_loss)
             #cdx 2018.10.18
             coarse_loss = 0.
             for i,(coarse_out,label) in enumerate(zip(coarse_outs,labels)):
                 coarse_label = label*tf.to_float(tf.greater(tf.reshape(valids,(-1,1,1,cfg.nr_skeleton)),1.1))
                 coarse_loss += tf.reduce_mean(tf.square(coarse_out - coarse_label)) / len(labels)
             self.add_tower_summary('coarse_loss',coarse_loss)
+            tf.summary.scalar('coarse_loss',coarse_loss)
             #coarse_loss = ohkm(coarse_loss,12)
             #
             refine_loss = tf.reduce_mean(tf.square(refine_out - label7), (1,2)) * tf.to_float((tf.greater(valids, 0.1)))
             refine_loss = ohkm(refine_loss, 8)
             self.add_tower_summary('refine_loss', refine_loss)
-
+            tf.summary.scalar('refine_loss',refine_loss)
             total_loss = refine_loss + global_loss + coarse_loss
             self.add_tower_summary('loss', total_loss)
             self.set_loss(total_loss)

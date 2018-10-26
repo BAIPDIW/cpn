@@ -124,7 +124,7 @@ class Base(object):
 
         # build_graph
         self.build_graph()
-
+        self.writer = tf.summary.FileWriter('/home/dx/cpntensorboard',self.sess.graph)
         # get data iter
         self._data_iter = data_iter
 
@@ -219,10 +219,11 @@ class Trainer(Base):
                                 self.net.make_network(is_train=True)
                                 if i == self.cfg.nr_gpus - 1:
                                     loss = self.net.get_loss(include_wd=True)
+                                    tf.summary.scalar('loss',loss)
                                 else:
                                     loss = self.net.get_loss()
+                                    tf.summary.scalar('loss',loss)
                                 self._input_list.append( self.net.get_inputs() )
-
                         tf.get_variable_scope().reuse_variables()
 
                         if i == 0:
@@ -284,20 +285,23 @@ class Trainer(Base):
         self.logger.info('Start training ...')
         start_itr = self.cur_epoch * self.cfg.epoch_size + 1
         nr_itrs = self.cfg.nr_gpus*self.cfg.batch_size
+
+        merge = tf.summary.merge_all()
+
         for itr in range(start_itr, self.cfg.max_itr + nr_itrs, nr_itrs):
             self.global_timer.tic()
 
             itrs = np.arange(itr, itr+nr_itrs)
             self.cur_epoch = itrs[-1] // self.cfg.epoch_size
 
-            setproctitle.setproctitle('train ' + self.cfg.proj_name + ' epoch:' + str(self.cur_epoch))
+            remain_time = int(((self.cfg.max_itr/self.cfg.epoch_size)-self.cur_epoch))*float((self.global_timer.average_time / 3600. * self.cfg.epoch_size / nr_itrs))
+            setproctitle.setproctitle('train ' + self.cfg.proj_name[5:18] + ' epoch:' + str(self.cur_epoch) +' remain:'+str(remain_time)[0:4]+'h')
 
             # apply current learning policy
             cur_lr = self.cfg.get_lr(itrs[-1])
             if not approx_equal(cur_lr, self.lr_eval):
                 print(self.lr_eval, cur_lr)
                 self.sess.run(tf.assign(self.lr, cur_lr))
-
             # input data
             self.read_timer.tic()
             feed_dict = self.next_feed()
@@ -305,10 +309,13 @@ class Trainer(Base):
 
             # train one step
             self.timer.tic()
-            _, self.lr_eval, *summary_res = self.sess.run(
-                [self.graph_ops[0], self.lr, *self.summary_dict.values()], feed_dict=feed_dict)
+            summary, _, self.lr_eval, *summary_res = self.sess.run(
+                [merge,self.graph_ops[0], self.lr, *self.summary_dict.values()], feed_dict=feed_dict)
             self.timer.toc()
 
+            
+            self.writer.add_summary(summary,itr)
+            
             iter_summary = dict()
             for i, k in enumerate(self.summary_dict.keys()):
                 iter_summary[k] = summary_res[i]
