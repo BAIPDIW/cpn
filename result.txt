@@ -135,4 +135,78 @@
  Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets= 20 ] = 0.842
 
 
+2018.10.29 res50.256*192 160 epoch 改进coarse net
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets= 20 ] = 0.696
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets= 20 ] = 0.881
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets= 20 ] = 0.769
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets= 20 ] = 0.662
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets= 20 ] = 0.760
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 20 ] = 0.763
+ Average Recall     (AR) @[ IoU=0.50      | area=   all | maxDets= 20 ] = 0.923
+ Average Recall     (AR) @[ IoU=0.75      | area=   all | maxDets= 20 ] = 0.827
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets= 20 ] = 0.716
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets= 20 ] = 0.828
+
+2018.11.1 res50.256*192 350 epoch 改进coarse net
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets= 20 ] = 0.705
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets= 20 ] = 0.884
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets= 20 ] = 0.780
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets= 20 ] = 0.669
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets= 20 ] = 0.772
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 20 ] = 0.774
+ Average Recall     (AR) @[ IoU=0.50      | area=   all | maxDets= 20 ] = 0.927
+ Average Recall     (AR) @[ IoU=0.75      | area=   all | maxDets= 20 ] = 0.837
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets= 20 ] = 0.726
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets= 20 ] = 0.840
+
+2018.11.1 res50.256*192 300 epoch 改进coarse net
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets= 20 ] = 0.705
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets= 20 ] = 0.885
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets= 20 ] = 0.778
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets= 20 ] = 0.669
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets= 20 ] = 0.770
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 20 ] = 0.774
+ Average Recall     (AR) @[ IoU=0.50      | area=   all | maxDets= 20 ] = 0.929
+ Average Recall     (AR) @[ IoU=0.75      | area=   all | maxDets= 20 ] = 0.835
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets= 20 ] = 0.726
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets= 20 ] = 0.839
+
+
+2018.11.1 res50.256*192 250 epoch 改进coarse net
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets= 20 ] = 0.705
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets= 20 ] = 0.884
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets= 20 ] = 0.779
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets= 20 ] = 0.668
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets= 20 ] = 0.772
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 20 ] = 0.772
+ Average Recall     (AR) @[ IoU=0.50      | area=   all | maxDets= 20 ] = 0.928
+ Average Recall     (AR) @[ IoU=0.75      | area=   all | maxDets= 20 ] = 0.835
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets= 20 ] = 0.723
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets= 20 ] = 0.839
+
+
+2018.11.1 res50.256*192 210 epoch 改进coarse net
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets= 20 ] = 0.703
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets= 20 ] = 0.884
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets= 20 ] = 0.777
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets= 20 ] = 0.668
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets= 20 ] = 0.768
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 20 ] = 0.771
+ Average Recall     (AR) @[ IoU=0.50      | area=   all | maxDets= 20 ] = 0.928
+ Average Recall     (AR) @[ IoU=0.75      | area=   all | maxDets= 20 ] = 0.832
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets= 20 ] = 0.725
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets= 20 ] = 0.836
+
+
+2018.11.1 res50.256*192 70 epoch 改进coarse net
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets= 20 ] = 0.673
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets= 20 ] = 0.871
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets= 20 ] = 0.749
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets= 20 ] = 0.642
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets= 20 ] = 0.732
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 20 ] = 0.741
+ Average Recall     (AR) @[ IoU=0.50      | area=   all | maxDets= 20 ] = 0.916
+ Average Recall     (AR) @[ IoU=0.75      | area=   all | maxDets= 20 ] = 0.806
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets= 20 ] = 0.696
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets= 20 ] = 0.803
 

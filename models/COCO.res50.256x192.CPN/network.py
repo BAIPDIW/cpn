@@ -66,7 +66,7 @@ def create_global_net(blocks, is_training, trainable=True):
     return global_fms, global_outs
 
 #cdx 2018.1018
-def create_coarse_net(blocks,is_trainging,trainable=True):
+def create_coarse_net(blocks,is_training,trainable=True):
     #blocks = [(32,64,48,256),(32,32,24,256),(32,16,12,256),(32,8,6,256)]
     initializer = tf.contrib.layers.xavier_initializer()
     bottleneck = resnet_v1.bottleneck
@@ -75,10 +75,14 @@ def create_coarse_net(blocks,is_trainging,trainable=True):
     last_fm = None
     for i,block in enumerate(blocks):
         mid_fm = block
-        with slim.arg_scope(resnet_arg_scope(bn_is_training=is_trainging)):
+        with slim.arg_scope(resnet_arg_scope(bn_is_training=is_training)):
             for j in range(i):
                 mid_fm = bottleneck(mid_fm,256,128,stride=1,scope='res{}/coarse_conv{}'.format(2+i,j))
                 coarse_fms.append(mid_fm)
+        mid_fm = tf.image.resize_bilinear(mid_fm, (cfg.output_shape[0], cfg.output_shape[1]),
+            name='upsample_conv/res{}'.format(2+i))
+        coarse_outs.append(mid_fm)
+    '''
     for i,block in enumerate(reversed(coarse_fms)):
         with slim.arg_scope(resnet_arg_scope(bn_is_training=is_trainging)):
             lateral = slim.conv2d(block, 256, [1, 1],
@@ -106,9 +110,17 @@ def create_coarse_net(blocks,is_trainging,trainable=True):
                 padding='SAME', activation_fn=None,
                 scope='pyramid2/res{}'.format(5-i))
         coarse_outs.append(tf.image.resize_bilinear(out, (cfg.output_shape[0], cfg.output_shape[1])))
+    '''
+    coarse_out = tf.concat(coarse_outs,axis=3)
+    with slim.arg_scope(resnet_arg_scope(bn_is_training=is_training)):
+        coarse_out = bottleneck(coarse_out, 256, 128, stride=1, scope='coarse_final_bottleneck')   #print("refine_fm.shape = ",refine_fm.shape)   refine_fm.shape =  (32, 64, 48, 256)
+        coarse = slim.conv2d(coarse_out, cfg.nr_skeleton, [3, 3],
+            trainable=trainable, weights_initializer=initializer,
+            padding='SAME', activation_fn=None,
+            scope='coarse_out')                                                           #print("res.shape = ",res.shape)   res.shape =  (32, 64, 48, 17)
     coarse_fms.reverse()
-    coarse_outs.reverse()
-    return coarse_fms,coarse_outs
+    #coarse_outs.reverse()
+    return coarse_fms,coarse
 
 def create_refine_net(blocks, is_training, trainable=True):
     #blocks = [(32,64,48,256),(32,32,24,256),(32,16,12,256),(32,8,6,256)]
@@ -168,9 +180,9 @@ class Network(ModelDesc):
             image = tf.placeholder(tf.float32, shape=[None, *cfg.data_shape, 3])
             self.set_inputs(image)
         
-        with tf.name_scope('image'):
-            image_shaped_input = tf.reshape(image, [-1, 256, 192, 3])
-            tf.summary.image('input',image_shaped_input,4)
+        #with tf.name_scope('image'):
+        #    image_shaped_input = tf.reshape(image, [-1, 256, 192, 3])
+         #   tf.summary.image('input',image_shaped_input,4)
 
         resnet_fms = resnet50(image, is_train, bn_trainable=True) #image = [32,256,192,3]   resnet_fms = [(32,64,48,256),(32,32,24,512),(32,16,12,1024),(32,8,6,2048)]
         global_fms, global_outs = create_global_net(resnet_fms, is_train) #global_fms = [(32,64,48,256),(32,32,24,256),(32,16,12,256),(32,8,6,256)],global_outs = [(32,64,48,17),(32,64,48,17),(32,64,48,17),(32,64,48,17)]
@@ -180,9 +192,9 @@ class Network(ModelDesc):
         coarse_fms,coarse_outs = create_coarse_net(global_fms,is_train)
         #
         refine_out = create_refine_net(coarse_fms, is_train)    #refine_out = (32,64,48,17)
-        with tf.name_scope('refine_out'):
-            refine_out_reshape = tf.reshape(refine_out,[-1,64,48,1])
-            tf.summary.image('heatmap',refine_out_reshape,17)
+        #with tf.name_scope('refine_out'):
+        #    refine_out_reshape = tf.reshape(refine_out,[-1,64,48,1])
+         #   tf.summary.image('heatmap',refine_out_reshape,17)
         # make loss
         if is_train:
             def ohkm(loss, top_k):
@@ -202,6 +214,7 @@ class Network(ModelDesc):
             global_loss /= 2.
             self.add_tower_summary('global_loss', global_loss)
             tf.summary.scalar('global_loss',global_loss)
+            '''
             #cdx 2018.10.18
             coarse_loss = 0.
             for i,(coarse_out,label) in enumerate(zip(coarse_outs,labels)):
@@ -211,6 +224,13 @@ class Network(ModelDesc):
             tf.summary.scalar('coarse_loss',coarse_loss)
             #coarse_loss = ohkm(coarse_loss,12)
             #
+            '''
+            coarse_loss = tf.reduce_mean(tf.square(coarse_outs - label7), (1,2)) * tf.to_float((tf.greater(valids, 0.1)))
+            coarse_loss = ohkm(coarse_loss, 12)
+            self.add_tower_summary('coarse_loss', coarse_loss)
+            tf.summary.scalar('coarse_loss',coarse_loss)
+
+
             refine_loss = tf.reduce_mean(tf.square(refine_out - label7), (1,2)) * tf.to_float((tf.greater(valids, 0.1)))
             refine_loss = ohkm(refine_loss, 8)
             self.add_tower_summary('refine_loss', refine_loss)
